@@ -341,3 +341,19 @@ export interface ConfigRestoreRequest {
   backupPath: string;
   app?: string;
 }
+
+export interface WebDavSetRequest {
+  baseUrl?: string;
+  remoteRoot?: string;
+  username?: string;
+  password?: string;
+  profile?: string;
+  enable?: boolean;
+  autoSync?: boolean;
+}
+
+export interface WebDavOpResponse {
+  success: boolean;
+  message: string;
+  output?: string;
+}

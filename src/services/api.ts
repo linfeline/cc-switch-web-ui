@@ -33,6 +33,7 @@ import type {
   ConfigImportRequest,
   ConfigBackupResponse,
   ConfigRestoreRequest,
+  WebDavSetRequest,
   ApiResponse,
 } from '../types';
 
@@ -520,6 +521,43 @@ export const configApi = {
 
   restore: async (request: ConfigRestoreRequest): Promise<any> => {
     const response = await api.post<ApiResponse<any>>('/config/restore', request);
+    return unwrap(response);
+  },
+
+  webdavShow: async (): Promise<{ success: boolean; message: string; output?: string }> => {
+    const response = await api.get<ApiResponse<{ success: boolean; message: string; output?: string }>>(
+      '/config/webdav'
+    );
+    return unwrap(response);
+  },
+
+  webdavCheckConnection: async (): Promise<{ success: boolean; message: string; output?: string }> => {
+    const response = await api.post<
+      ApiResponse<{ success: boolean; message: string; output?: string }>
+    >('/config/webdav/check-connection');
+    return unwrap(response);
+  },
+
+  webdavUpload: async (): Promise<{ success: boolean; message: string; output?: string }> => {
+    const response = await api.post<
+      ApiResponse<{ success: boolean; message: string; output?: string }>
+    >('/config/webdav/upload');
+    return unwrap(response);
+  },
+
+  webdavDownload: async (): Promise<{ success: boolean; message: string; output?: string }> => {
+    const response = await api.post<
+      ApiResponse<{ success: boolean; message: string; output?: string }>
+    >('/config/webdav/download');
+    return unwrap(response);
+  },
+
+  webdavSet: async (
+    request: WebDavSetRequest
+  ): Promise<{ success: boolean; message: string; output?: string }> => {
+    const response = await api.post<
+      ApiResponse<{ success: boolean; message: string; output?: string }>
+    >('/config/webdav/set', request);
     return unwrap(response);
   },
 };

@@ -6,7 +6,9 @@ import {
   FileJson, 
   RotateCcw,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Cloud,
+  RefreshCw,
 } from 'lucide-react';
 import { Card, CardHeader } from '../components/Card';
 import { Button } from '../components/Button';
@@ -27,6 +29,18 @@ export function Config() {
   const [importPath, setImportPath] = useState('');
   const [backupPath, setBackupPath] = useState('');
   const [restorePath, setRestorePath] = useState('');
+
+  const [webdavOutput, setWebdavOutput] = useState<string>('');
+  const [webdavBusy, setWebdavBusy] = useState<string | null>(null);
+  const [webdavForm, setWebdavForm] = useState({
+    baseUrl: '',
+    remoteRoot: '',
+    username: '',
+    password: '',
+    profile: 'default',
+    enable: true,
+    autoSync: false,
+  });
 
   useEffect(() => {
     fetchConfigPath();
@@ -117,6 +131,44 @@ export function Config() {
     }
   };
 
+  const runWebDav = async (
+    action: string,
+    fn: () => Promise<{ message: string; output?: string }>
+  ) => {
+    setWebdavBusy(action);
+    setMessage(null);
+    try {
+      const result = await fn();
+      setWebdavOutput(result.output || result.message || '');
+      setMessage({ type: 'success', text: result.message || `WebDAV ${action} OK` });
+    } catch (err) {
+      const text = err instanceof Error ? err.message : `WebDAV ${action} failed`;
+      setWebdavOutput(text);
+      setMessage({ type: 'error', text });
+    } finally {
+      setWebdavBusy(null);
+    }
+  };
+
+  const handleWebDavSet = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!webdavForm.baseUrl) {
+      setMessage({ type: 'error', text: 'Base URL is required to set WebDAV settings' });
+      return;
+    }
+    await runWebDav('set', () =>
+      configApi.webdavSet({
+        baseUrl: webdavForm.baseUrl,
+        remoteRoot: webdavForm.remoteRoot || undefined,
+        username: webdavForm.username || undefined,
+        password: webdavForm.password || undefined,
+        profile: webdavForm.profile || undefined,
+        enable: webdavForm.enable,
+        autoSync: webdavForm.autoSync,
+      })
+    );
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -133,7 +185,7 @@ export function Config() {
           Configuration
         </h2>
         <p className="text-slate-500 dark:text-slate-400 mt-1">
-          Manage configuration file, backups, and exports
+          Manage configuration file, backups, exports, and WebDAV sync
         </p>
       </div>
 
@@ -288,6 +340,143 @@ export function Config() {
           </form>
         </Card>
       </div>
+
+      {/* WebDAV — CLI-backed only */}
+      <Card>
+        <CardHeader
+          title="WebDAV Sync"
+          subtitle="Uses cc-switch config webdav (show / set / check-connection / upload / download)"
+          action={<Cloud className="w-5 h-5 text-slate-400" />}
+        />
+        <div className="space-y-4">
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="secondary"
+              disabled={!!webdavBusy}
+              onClick={() => runWebDav('show', () => configApi.webdavShow())}
+            >
+              {webdavBusy === 'show' ? 'Loading...' : 'Show / Status'}
+            </Button>
+            <Button
+              variant="secondary"
+              disabled={!!webdavBusy}
+              onClick={() => runWebDav('check', () => configApi.webdavCheckConnection())}
+            >
+              {webdavBusy === 'check' ? 'Checking...' : 'Check Connection'}
+            </Button>
+            <Button
+              disabled={!!webdavBusy}
+              onClick={() => runWebDav('upload', () => configApi.webdavUpload())}
+            >
+              {webdavBusy === 'upload' ? 'Uploading...' : 'Upload'}
+            </Button>
+            <Button
+              variant="danger"
+              disabled={!!webdavBusy}
+              onClick={() => {
+                if (!confirm('Download will overwrite local snapshot from remote WebDAV. Continue?')) {
+                  return;
+                }
+                return runWebDav('download', () => configApi.webdavDownload());
+              }}
+            >
+              {webdavBusy === 'download' ? 'Downloading...' : 'Download'}
+            </Button>
+            <Button
+              variant="secondary"
+              disabled={!!webdavBusy}
+              onClick={() => runWebDav('show', () => configApi.webdavShow())}
+              title="Refresh status"
+            >
+              <RefreshCw className="w-4 h-4" />
+            </Button>
+          </div>
+
+          {webdavOutput && (
+            <pre className="p-3 text-xs font-mono whitespace-pre-wrap break-all bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-700 max-h-64 overflow-auto">
+              {webdavOutput}
+            </pre>
+          )}
+
+          <form onSubmit={handleWebDavSet} className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-slate-200 dark:border-slate-700">
+            <div className="md:col-span-2">
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                Set / update via non-interactive CLI flags (`config webdav set`). Does not write settings files or SQLite directly.
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Base URL</label>
+              <input
+                type="text"
+                value={webdavForm.baseUrl}
+                onChange={(e) => setWebdavForm({ ...webdavForm, baseUrl: e.target.value })}
+                placeholder="https://dav.example.com/remote.php/dav"
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Remote Root</label>
+              <input
+                type="text"
+                value={webdavForm.remoteRoot}
+                onChange={(e) => setWebdavForm({ ...webdavForm, remoteRoot: e.target.value })}
+                placeholder="/cc-switch"
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Username</label>
+              <input
+                type="text"
+                value={webdavForm.username}
+                onChange={(e) => setWebdavForm({ ...webdavForm, username: e.target.value })}
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Password</label>
+              <input
+                type="password"
+                value={webdavForm.password}
+                onChange={(e) => setWebdavForm({ ...webdavForm, password: e.target.value })}
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Profile</label>
+              <input
+                type="text"
+                value={webdavForm.profile}
+                onChange={(e) => setWebdavForm({ ...webdavForm, profile: e.target.value })}
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+              />
+            </div>
+            <div className="flex items-center gap-6 pt-6">
+              <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+                <input
+                  type="checkbox"
+                  checked={webdavForm.enable}
+                  onChange={(e) => setWebdavForm({ ...webdavForm, enable: e.target.checked })}
+                />
+                Enable
+              </label>
+              <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+                <input
+                  type="checkbox"
+                  checked={webdavForm.autoSync}
+                  onChange={(e) => setWebdavForm({ ...webdavForm, autoSync: e.target.checked })}
+                />
+                Auto sync
+              </label>
+            </div>
+            <div className="md:col-span-2">
+              <Button type="submit" className="w-full md:w-auto" disabled={!!webdavBusy || !webdavForm.baseUrl}>
+                {webdavBusy === 'set' ? 'Saving...' : 'Save WebDAV Settings'}
+              </Button>
+            </div>
+          </form>
+        </div>
+      </Card>
     </div>
   );
 }
