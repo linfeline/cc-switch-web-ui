@@ -24,7 +24,7 @@ Required / recommended env:
 |----------|---------|---------|
 | `CC_SWITCH_PATH` | Binary path | `$HOME/.local/bin/cc-switch` |
 | `CC_SWITCH_CONFIG_DIR` | Optional data dir override | `/tmp/cc-switch-web-sandbox` |
-| `PORT` / `HOST` | Listen address | `3010` / `127.0.0.1` |
+| `PORT` / `HOST` | Listen address | `33010` / `127.0.0.1` |
 | `ADMIN_PASSWORD` | Bearer token for `/api/*` (except `/api/health`, `/api/auth`) | set a real secret |
 
 **Never** run mutation tests against the real `~/.cc-switch`. Always set
@@ -48,8 +48,10 @@ cd /path/to/cc-switch-web-ui
 npm run dev
 ```
 
-Open: http://127.0.0.1:3010  
-Health: http://127.0.0.1:3010/api/health  
+Open: http://127.0.0.1:33010
+
+Health: http://127.0.0.1:33010/api/health
+
 Auth header: `Authorization: Bearer <ADMIN_PASSWORD>`
 
 ## Start (production build)
@@ -59,7 +61,7 @@ cd /path/to/cc-switch-web-ui
 export NODE_ENV=production
 # export CC_SWITCH_PATH=$HOME/.local/bin/cc-switch   # optional if auto-detected
 export HOST=127.0.0.1
-export PORT=3010
+export PORT=33010
 npm run build
 npm start
 ```
@@ -111,7 +113,7 @@ WorkingDirectory=/path/to/cc-switch-web-ui
 Environment=NODE_ENV=production
 Environment=CC_SWITCH_PATH=%h/.local/bin/cc-switch
 Environment=HOST=127.0.0.1
-Environment=PORT=3010
+Environment=PORT=33010
 EnvironmentFile=/path/to/cc-switch-web-ui/.env
 ExecStart=/usr/bin/node dist/server/index.js
 Restart=on-failure

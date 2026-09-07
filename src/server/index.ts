@@ -33,7 +33,7 @@ import { ccSwitchAdapter } from './services/ccswitch-adapter.js';
 import { configStorage } from './services/config-storage.js';
 
 // Configuration
-const PORT = parseInt(process.env.PORT || '3010', 10);
+const PORT = parseInt(process.env.PORT || '33010', 10);
 const HOST = process.env.HOST || '0.0.0.0';
 const isProduction = process.env.NODE_ENV === 'production';
 

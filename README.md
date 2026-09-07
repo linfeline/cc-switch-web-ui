@@ -159,7 +159,7 @@ Edit the `.env` file with your preferred settings:
 
 ```env
 # Server Configuration
-PORT=3010
+PORT=33010
 HOST=0.0.0.0
 NODE_ENV=production
 
@@ -186,7 +186,7 @@ See [DEPLOYMENT.md](./DEPLOYMENT.md) for install, sandbox tests, and start comma
 npm run dev
 ```
 
-The application will start at `http://localhost:3010` (or the port you configured)
+The application will start at `http://localhost:33010` (or the port you configured)
 
 ### Production Build
 
@@ -197,7 +197,7 @@ npm start
 
 ### Access the Application
 
-1. Open your browser and navigate to `http://localhost:3010`
+1. Open your browser and navigate to `http://localhost:33010`
 2. Log in with the password you set in `ADMIN_PASSWORD`
 3. Start managing your AI provider configurations!
 
@@ -207,7 +207,7 @@ npm start
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `PORT` | Server port | `3010` |
+| `PORT` | Server port | `33010` |
 | `HOST` | Server host binding | `0.0.0.0` |
 | `NODE_ENV` | Environment mode | `development` |
 | `ADMIN_PASSWORD` | Password for API authentication | (none - auth disabled) |
