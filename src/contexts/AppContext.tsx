@@ -1,28 +1,35 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
-// Core apps supported by cc-switch CLI
-export type CoreAppType = 'claude' | 'codex' | 'gemini';
+// Core apps supported by cc-switch CLI (--app)
+export type CoreAppType =
+  | 'claude'
+  | 'codex'
+  | 'gemini'
+  | 'opencode'
+  | 'hermes'
+  | 'openclaw'
+  | 'pi';
 
-// Custom apps that can be configured
-export type CustomAppType = 'kilocode-cli' | 'opencode' | 'amp';
+// Legacy custom apps (file-based / non-CLI-core)
+export type CustomAppType = 'kilocode-cli' | 'amp';
 
 // Combined app type
 export type AppType = CoreAppType | CustomAppType;
 
 // List of valid app values for validation
 export const VALID_APPS: AppType[] = [
-  'claude', 'codex', 'gemini',
-  'kilocode-cli', 'opencode', 'amp'
+  'claude', 'codex', 'gemini', 'opencode', 'hermes', 'openclaw', 'pi',
+  'kilocode-cli', 'amp',
 ];
 
 // Check if an app is a core app
 export function isCoreApp(app: AppType): app is CoreAppType {
-  return ['claude', 'codex', 'gemini'].includes(app);
+  return ['claude', 'codex', 'gemini', 'opencode', 'hermes', 'openclaw', 'pi'].includes(app);
 }
 
 // Check if an app is a custom app
 export function isCustomApp(app: AppType): app is CustomAppType {
-  return ['kilocode-cli', 'opencode', 'amp'].includes(app);
+  return ['kilocode-cli', 'amp'].includes(app);
 }
 
 interface AppContextType {
@@ -83,12 +90,15 @@ export function useApp(): AppContextType {
 
 // App options for the dropdown selector
 export const APP_OPTIONS: { value: AppType; label: string; icon: string; category: 'core' | 'custom' }[] = [
-  // Core apps
+  // Core apps (CLI --app)
   { value: 'claude', label: 'Claude', icon: '🤖', category: 'core' },
   { value: 'codex', label: 'Codex', icon: '💻', category: 'core' },
   { value: 'gemini', label: 'Gemini', icon: '✨', category: 'core' },
-  // Custom apps
+  { value: 'opencode', label: 'OpenCode', icon: '🔓', category: 'core' },
+  { value: 'hermes', label: 'Hermes', icon: '🪽', category: 'core' },
+  { value: 'openclaw', label: 'OpenClaw', icon: '🦞', category: 'core' },
+  { value: 'pi', label: 'Pi', icon: 'π', category: 'core' },
+  // Legacy custom apps
   { value: 'kilocode-cli', label: 'Kilocode CLI', icon: '🔧', category: 'custom' },
-  { value: 'opencode', label: 'OpenCode', icon: '🔓', category: 'custom' },
   { value: 'amp', label: 'AMP', icon: '⚡', category: 'custom' },
 ];
