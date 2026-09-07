@@ -12,7 +12,9 @@
     "build:server": "tsc -p tsconfig.server.json",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:sandbox": "tsx scripts/test-sandbox.mjs",
+    "test:readonly-real": "tsx scripts/test-readonly-real.mjs"
   },
   "dependencies": {
     "axios": "^1.6.7",

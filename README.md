@@ -168,7 +168,15 @@ ADMIN_PASSWORD=your_secure_password_here
 
 # CORS (set to your frontend URL in production)
 CORS_ORIGIN=*
+
+# Path to cc-switch binary (optional; auto-detects ~/.local/bin/cc-switch and PATH)
+# CC_SWITCH_PATH=/usr/local/bin/cc-switch
+
+# Optional: isolate data dir (required for write tests; leave unset for real ~/.cc-switch)
+# CC_SWITCH_CONFIG_DIR=/tmp/cc-switch-web-sandbox
 ```
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for install, sandbox tests, and start commands.
 
 ## 🎮 Usage
 
