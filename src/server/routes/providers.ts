@@ -160,7 +160,7 @@ router.get('/current', async (req: Request, res: Response) => {
  * GET /api/providers/kilocode/config
  * Get raw kilocode config
  */
-router.get('/kilocode/config', async (req: Request, res: Response) => {
+router.get('/kilocode/config', async (_req: Request, res: Response) => {
   try {
     const config = await kilocodeService.getRawConfig();
     res.json({

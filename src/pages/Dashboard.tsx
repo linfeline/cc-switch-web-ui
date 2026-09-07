@@ -162,9 +162,37 @@ export function Dashboard() {
         <CardHeader title="System Information" />
         <div className="space-y-3">
           <div className="flex justify-between py-2 border-b border-slate-200 dark:border-slate-700">
-            <span className="text-slate-500 dark:text-slate-400">Version</span>
+            <span className="text-slate-500 dark:text-slate-400">Web UI Version</span>
             <span className="font-medium text-slate-900 dark:text-white">
               {status?.version || 'N/A'}
+            </span>
+          </div>
+          <div className="flex justify-between py-2 border-b border-slate-200 dark:border-slate-700">
+            <span className="text-slate-500 dark:text-slate-400">cc-switch</span>
+            <span className="font-medium text-slate-900 dark:text-white text-right">
+              {health?.ccSwitchVersion || 'N/A'}
+              {health?.ccSwitchPath ? (
+                <span className="block text-xs text-slate-500 dark:text-slate-400 font-normal break-all">
+                  {health.ccSwitchPath}
+                </span>
+              ) : null}
+            </span>
+          </div>
+          <div className="flex justify-between py-2 border-b border-slate-200 dark:border-slate-700">
+            <span className="text-slate-500 dark:text-slate-400">DB / Schema</span>
+            <span className="font-medium text-slate-900 dark:text-white text-right">
+              user_version {health?.schemaVersion ?? 'N/A'}
+              {health?.dbPath ? (
+                <span className="block text-xs text-slate-500 dark:text-slate-400 font-normal break-all">
+                  {health.dbPath}
+                </span>
+              ) : null}
+            </span>
+          </div>
+          <div className="flex justify-between py-2 border-b border-slate-200 dark:border-slate-700">
+            <span className="text-slate-500 dark:text-slate-400">Backend Mode</span>
+            <span className="font-medium text-slate-900 dark:text-white">
+              {health?.backendMode || 'N/A'}
             </span>
           </div>
           <div className="flex justify-between py-2 border-b border-slate-200 dark:border-slate-700">
@@ -180,6 +208,16 @@ export function Dashboard() {
               label={health?.ccSwitchAvailable ? 'Yes' : 'No'}
             />
           </div>
+          {health?.warnings && health.warnings.length > 0 && (
+            <div className="pt-2">
+              <p className="text-sm text-amber-600 dark:text-amber-400 mb-1">Capability warnings</p>
+              <ul className="text-xs text-slate-600 dark:text-slate-400 list-disc pl-4 space-y-1">
+                {health.warnings.slice(0, 6).map((w) => (
+                  <li key={w}>{w}</li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </Card>
     </div>

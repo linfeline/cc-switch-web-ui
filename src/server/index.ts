@@ -80,25 +80,36 @@ async function createServer() {
 
   /**
    * GET /api/health
-   * Health check endpoint
+   * Health check endpoint with backend capability details
    */
   app.get('/api/health', async (_req, res) => {
     const startTime = Date.now();
-    
+
     try {
-      const ccSwitchAvailable = await ccSwitchAdapter.isAvailable();
+      const backend = await ccSwitchAdapter.getBackendHealth();
       const storageAccessible = configStorage.isAccessible();
-      
+
+      const healthy = backend.ccSwitchAvailable && storageAccessible && backend.schemaVersion >= 0;
+      const degraded = healthy && backend.warnings.length > 0;
+
       const health = {
-        status: ccSwitchAvailable && storageAccessible ? 'ok' : 'error',
+        status: healthy ? (degraded ? 'degraded' : 'ok') : 'error',
         timestamp: new Date().toISOString(),
         uptime: process.uptime(),
-        ccSwitchAvailable,
+        ccSwitchAvailable: backend.ccSwitchAvailable,
         storageAccessible,
         responseTime: `${Date.now() - startTime}ms`,
+        ccSwitchPath: backend.ccSwitchPath,
+        ccSwitchVersion: backend.ccSwitchVersion,
+        configDir: backend.configDir,
+        dbPath: backend.dbPath,
+        schemaVersion: backend.schemaVersion,
+        backendMode: backend.backendMode,
+        capabilities: backend.capabilities,
+        warnings: backend.warnings,
       };
 
-      const statusCode = health.status === 'ok' ? 200 : 503;
+      const statusCode = health.status === 'error' ? 503 : 200;
       res.status(statusCode).json(health);
     } catch (error) {
       res.status(503).json({
@@ -239,11 +250,18 @@ async function startServer() {
   try {
     // Check cc-switch availability
     console.log('Checking cc-switch availability...');
-    const ccSwitchAvailable = await ccSwitchAdapter.isAvailable();
-    if (!ccSwitchAvailable) {
+    const backend = await ccSwitchAdapter.getBackendHealth();
+    if (!backend.ccSwitchAvailable) {
       console.warn('WARNING: cc-switch binary is not available. Some features may not work.');
     } else {
-      console.log('cc-switch binary is available.');
+      console.log(`cc-switch: ${backend.ccSwitchVersion} @ ${backend.ccSwitchPath}`);
+      console.log(`config dir: ${backend.configDir}`);
+      console.log(`db: ${backend.dbPath} (user_version=${backend.schemaVersion})`);
+      console.log(`backend mode: ${backend.backendMode}`);
+      if (backend.warnings.length) {
+        console.warn('capability warnings:');
+        for (const w of backend.warnings) console.warn(`  - ${w}`);
+      }
     }
 
     // Check storage

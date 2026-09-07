@@ -6,29 +6,36 @@
 // App Types
 // ============================================
 
-// Core apps supported by cc-switch CLI
-export type CoreAppType = 'claude' | 'codex' | 'gemini';
+// Core apps supported by cc-switch CLI (--app)
+export type CoreAppType =
+  | 'claude'
+  | 'codex'
+  | 'gemini'
+  | 'opencode'
+  | 'hermes'
+  | 'openclaw'
+  | 'pi';
 
-// Custom apps that can be configured
-export type CustomAppType = 'kilocode-cli' | 'opencode' | 'amp';
+// Legacy custom apps (file-based / non-CLI-core)
+export type CustomAppType = 'kilocode-cli' | 'amp';
 
 // Combined app type
 export type AppType = CoreAppType | CustomAppType;
 
 // List of valid app values for validation
 export const VALID_APPS: AppType[] = [
-  'claude', 'codex', 'gemini',
-  'kilocode-cli', 'opencode', 'amp'
+  'claude', 'codex', 'gemini', 'opencode', 'hermes', 'openclaw', 'pi',
+  'kilocode-cli', 'amp',
 ];
 
 // Check if an app is a core app
 export function isCoreApp(app: AppType): app is CoreAppType {
-  return ['claude', 'codex', 'gemini'].includes(app);
+  return ['claude', 'codex', 'gemini', 'opencode', 'hermes', 'openclaw', 'pi'].includes(app);
 }
 
 // Check if an app is a custom app
 export function isCustomApp(app: AppType): app is CustomAppType {
-  return ['kilocode-cli', 'opencode', 'amp'].includes(app);
+  return ['kilocode-cli', 'amp'].includes(app);
 }
 
 // ============================================
@@ -202,10 +209,26 @@ export interface StatusResponse {
 // ============================================
 
 export interface HealthResponse {
-  status: 'ok' | 'error';
+  status: 'ok' | 'error' | 'degraded';
   timestamp: string;
   uptime: number;
   ccSwitchAvailable: boolean;
+  storageAccessible?: boolean;
+  responseTime?: string;
+  ccSwitchPath?: string;
+  ccSwitchVersion?: string;
+  configDir?: string;
+  dbPath?: string;
+  schemaVersion?: number;
+  backendMode?: string;
+  capabilities?: {
+    cliMutations: boolean;
+    sqliteReads: boolean;
+    settingsJson: boolean;
+    interactiveOnlyCli: string[];
+  };
+  warnings?: string[];
+  error?: string;
 }
 
 // ============================================
