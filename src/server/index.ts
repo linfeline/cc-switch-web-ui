@@ -215,7 +215,7 @@ async function createServer() {
 
   if (isProduction) {
     // Serve static files from the dist directory
-    const staticDir = path.join(__dirname, '..', '..');
+    const staticDir = path.join(__dirname, '..');
     app.use(express.static(staticDir));
 
     // Handle SPA routing - serve index.html for all non-API routes
